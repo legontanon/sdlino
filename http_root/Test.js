@@ -22,7 +22,7 @@
  */
 
 
-function TestHtmlDlg() {
+function TestHtmlDlg() { // TODO get it to work this way...
   try {
     var d = new HtmlDlg("Dlg",
                         "title",
@@ -76,8 +76,17 @@ function TestDiagramSpace() {
 
   function delete_elem_cbg(e) { return function() { e.remove(); } }
   var ps = [
-{name:"INITIAL",type:"state"},
-{name:"STARTING",type:"state"},
+{id:"00",name:"INITIAL",type:"state",x:500,y:200,next:"01"},
+{id:"01",name:"unlock",type:"output",x:500,y:400,next:"02"},
+{id:"02",name:"start_timer",type:"output",x:500,y:400,next:"03"},
+{id:"03",name:"STARTING",type:"state",x:500,y:300,next:"03"},
+//{id:"04",name:undefined,input_ids:[""]},
+{id:"05",name:"locked",type:"input"},
+{id:"06",name:"t1_out",type:"input"},
+{id:"07",name:"FAILED",type:"state"},
+{id:"03",name:"STARTING",type:"state",x:500,y:300,next:"03"},
+{id:"03",name:"STARTING",type:"state",x:500,y:300,next:"03"},
+{id:"02",name:"close",type:"output",x:500,y:400,next:"03"},
 {name:"OPENED",type:"state"},
 {name:"CLOSED",type:"state"},
 {name:"LOCKED",type:"state"},
@@ -86,20 +95,17 @@ function TestDiagramSpace() {
 {name:"get_door_state",type:"output"},
 {name:"opened",type:"input"},
 {name:"closed",type:"input"},
-{name:"locked",type:"input"},
-{name:"lock",type:"output"},
+{name:"unlocked",type:"input"},
 {name:"unlock",type:"output"},
+{name:"lock",type:"output"},
 {name:"open",type:"output"},
 {name:"close",type:"output"},
-{name:'',type:"wait"},
-// {name:'',type:"wait"},
-// {name:'',type:"wait"},
 ]
     //"input","input","output","procedure","cond","wait"];//,"dst","src"]
 
-  function new_elem(name,type) {
-    var text = (type == 'wait')  ? 'X' : name;
-    var e = d.newElem(text, type, true);
+  function new_elem(o) {
+    // var text = (type == 'wait')  ? ' ' : o.name;
+    var e = d.newElem(text, o.type, true);
 
      e.addCtxBtn('edit',"icn/edit.png",edit_text_cbg);
      e.addCtxBtn('delete',"icn/trash.png",delete_elem_cbg);
@@ -122,12 +128,12 @@ function TestDiagramSpace() {
          e.addSrc('Flow','W',function(x){L('F',x); return true;});
          e.addDst('Flow','N');
          break;
-       case "wait":
-         e.addSrc('Wait','W',add_wait_joint);
-         e.addDst('Flow','N');
-         e.label.hide();
-         e.body.attr('fill','black');
-         break;
+      //  case "wait":
+      //    e.addSrc('Wait','W',add_wait_joint);
+      //    e.addDst('Flow','N');
+      //    e.label.hide();
+      //    e.body.attr('fill','black');
+      //    break;
        case "input":
           e.addSrc('Flow','S',function(x){L(x); return true;});
           var d1 = e.addDst('Wait','N',add_wait_joint);
