@@ -11,3 +11,27 @@ diagrams.
 
 For those unfamiliar with Arduino; It is a micro-controler development
 platform based in C.
+
+The project is being written in JS, the parts that are there are being run only on
+Firefox so far. Finally there should be a node.js server to compile & upload
+the output, and to store the projects to the filesystem.
+
+Current Status: I'sd say 25% up to pre-alpha release...
+
+Some of the frontend (browser) code is there already:
+
+DiagramState.js manages flowcharting, is buggy but almost there.
+HtmlDlg.js creates pop-up dialogs using <form>s... more cosmetics...
+POM.js manages localStorage of complex objects... to be tested/used/maybe refactored
+
+The backend SDL data model and the "spaghetti code compiler" (a.k.a PastaMatic)
+is already in my head and very stable since I've got this thing bugging my
+brains for years. First will be run in the browser, later in the node.js server,
+Yes, I love JS. The Arduino runtime is coming paralel with the compiler...
+
+Licence is GPL for everything (Even the generated code...) until I find a
+propper licencing recipe.
+
+Cheers
+
+\Lego
