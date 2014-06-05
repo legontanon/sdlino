@@ -1,0 +1,13 @@
+$Id:$
+
+SDLino
+
+SDLino is a partial implementation (editor/compiler) of ITU-T Z.100/SDL
+targeting the Arduino platform.
+
+For those unfamiliar with SDL is a graphical programming language, basically
+a mix of Flow Charts and State Transition diagrams, and module interaction
+diagrams.
+
+For those unfamiliar with Arduino; It is a micro-controler development
+platform based in C.
