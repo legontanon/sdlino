@@ -29,13 +29,14 @@ function D(x) {
   L((new Error()).stack);
 }
 
-function r_true() {return true;}
-function r_false() {return false;}
+function r_arg_cbg(arg) {return function() { return arg;}}
+var r_true = r_arg_cbg(true);
+var r_false = r_arg_cbg(false);
 function nop(){}
 
 var uuid = Raphael.createUUID;
 
-
+// http://monocleglobe.wordpress.com/2010/01/12/everybody-needs-a-little-printf-in-their-javascript/
 String.prototype.printf = function (obj) {
   var useArguments = false;
   var _arguments = arguments;
@@ -66,3 +67,24 @@ String.prototype.printf = function (obj) {
     });
   }
 };
+
+
+function RemoteFile(uri,onload_cb) {
+  var me;
+  try { me = this; } catch(e) { me = new Object(); };
+
+  var oReq = me.req = new XMLHttpRequest();
+  me.uri = uri;
+
+  oReq.open("GET", uri, true);
+  oReq.responseType = "text";
+
+
+  oReq.onload = function (oEvent) {
+    me.text = oReq.responseText;
+    if (onload_cb) onload_cb(me.text);
+  }
+
+  oReq.send(null);
+  return me;
+}

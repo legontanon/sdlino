@@ -1,11 +1,17 @@
-///Header
-/* SDLino generated spagetti code
+ /* template.c
+  * SDLino - An SDL implementation for Arduino
+  * Template for the arduino target code.
+  *
+  * (c) 2014 Luis Enrique Garcia Ontañon <luis@ontanon.org>
+ */
+///Head
+/* SDLino generated spaghetti code
+ * for {{system_name}}
+ * on {{timestamp}} by {{user}} at {{host}}
  *
+ * {{copyright}}
  *
- *
- * $Id:$
- *
- * SDLino - An SDL implementation
+ * SDLino - An SDL implementation for Arduino
  * (c) 2014 Luis Enrique Garcia Ontañon <luis@ontanon.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -24,88 +30,80 @@
  */
 #include "sdlino.h"
 
-///StructTypeHead
-typedef struct _sdlino_type_{{type_name}}_t {
-///StructTypeItem
-    {{item_type}} {{item_name}}{{item_card}};
-///StructTypeTail
-} sdlino_type_{{type_name}}_t;
+///TypeDecl
+typedef struct _{{type_name}}_T {{type_name}}_T;
+///TypeDefHead
+struct _{{type_name}}_T {
+///TypeDefItem
+    {{item_type}}_T {{item_name}}{{item_card}};
+///TypeDefFoot
+};
 
-///SignalDataHead
-typedef struct _sdlino_sig_{{type_name}}_t {
-///StructDataItem
-{{item_type}} {{item_name}}{{item_card}};
-///StructDataTail
-} sdlino_type_{{type_name}}_t;
+///ProcDeclHead
+sdlino_wait_id_t P_{{proc_name}}( sdlino_wait_id_t, sdlino_signal_t*, sdlino_process_t*);
+typedef struct _{{proc_name}}_P {
+///ProcDeclItem
+    {{var_type}}_T {{var_name}}{{var_cardinality}};
+///ProcDeclFoot
+} {{proc_name}}_P;
 
-///ProcessDataHead
-typedef struct _sdlino_process_{{process_name}}_t {
-///ProcessDataItem
-   {{item_type}} {{item_name}}{{item_card}};
-///ProcessDataTail
-} sdlino_process_{{process_name}}_t;
-
-
-///ProcessFnHead
+///ProcessDefHead
 sdlino_wait_id_t sdlino_process_{{process_name}}(
       sdlino_wait_id_t wait,
       sdlino_signal_t* sig,
       sdlino_process_t* proc) {
 
-      sdlino_process_{{process_name}}_t* data = proc->data;
+      {{proc_name}}_P* data = ({{proc_name}}_P*)proc->data;
 
-///ProcessProcDecl
-     sdlino_procedure_{{procedure_name}}_t {{procedure_name}}_data;
-
-///Process
   switch(wait) {
     case SDLINO_WAIT_START:
-      memset(data,1,sizeof(sdlino_process_{{process_name}}_t));
       goto initial_state:
-
-///ProcessWaitHead
+///WaitHead
     case {{wait_id}}:
       switch(sig->id) {
         case SDLINO_SIG_KILL:
           D(("Process %d Killed"))
           return SDLINO_PROCESS_DEAD;
 
-///ProcessWaitSignal
+///WaitItem
         case {{signal_id}}:
-          goto {{target_id}};
+          goto {{dst_target_id}};
 
-///ProcessWaitTail
+///WaitFoot
         default:
           return SDLINO_UNEXPECTED_SIGNAL;
         } /* switch(sig->id) */
 
-///IntoStateItem
-          {{state_name}}: D(("%d: => %s",proc->id,"{{state_name}}"));
+///State
+          {{state_name}}: {{target_id}}:
+          SDLinoDebug((DEBUG_STATE,0,"%d: => %s",proc->id,"{{state_name}}"));
           goto {{dst_target_id}};
 
-///GoToStateItem
-          {{target_id}}: proc->state = {{state_id}}; goto {{state_name}};
+///GoToState
+          {{target_id}}: goto {{state_name}};
 
-///CondItem
+///Condition
           {{target_id}}: if ( {{condition}} ) goto {{true_target_id}}; else goto {{false_target_id}};
 
-///VarAssignmentItem
-          {{target_id}}: data.{{varname}} = ({{expr}}); goto {{target_id}};
+///VarAssignment
+          {{target_id}}: data.{{var_name}} = ({{c_expr}}); goto {{dst_target_id}};
 
-///OutputItem
+///Output
           {{target_id}}: sdlino_send_sig(proc,{{signal_id}},{{sig_params}}); return {{target_wait}};
 
-///ProcedureCallItem
+///ProcCall
           {{target_id}}: {
-            proc_data(data,1,sizeof(sdlino_procedure_{{procedure_name}}_t));
-            sdlino_procedure_{{procedure_name}}({{procedure_name}}_data,{{signal_id}},{{sig_params}});
-            return {{target_wait}};
+            // TODO
           }
-///ProcessFnTail
+///ProcCallReturn
+
+///ProcDefFoot
   } /* switch(wait) */
   error:
   return SDLINO_INTERNAL_ERROR;
 }
 
 
-///Trailer
+///Foot
+/*EOF*/
+///Eof

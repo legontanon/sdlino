@@ -187,7 +187,6 @@ function DiagramSpace(cont) {
     ds.paths.signal = ds.paths.output;
     ds.paths.dst = ds.paths.src;
 
-
     var flow_line = paper.path("").attr({'stroke':'#FF0000'});
     flow_line.hide();
 
@@ -265,14 +264,16 @@ function DiagramSpace(cont) {
         var id = uuid();
 
         o.set_type = function(new_type) { o.type = type = o.dst_type = new_type; }
+        o.choose = function(){
+          if (flow) {
+            o.attr('fill','#FF0000');
+            flow.dst = s;
+            flow.flowDst = o;
+          }
+        }
+
         o.enable = function() {
-          o.mouseover(function(){
-            if (flow) {
-              o.attr('fill','#FF0000');
-              flow.dst = s;
-              flow.flowDst = o;
-            }
-          });
+          o.mouseover(function(){o.choose()});
           o.mouseout(function() {
             if (flow) {
               o.attr('fill','#FFFF00');
@@ -387,7 +388,6 @@ function DiagramSpace(cont) {
           o.parent_element = s;
           o.redraw = nop;
           o.src_type = type;
-
           var x = c.x;
           var y = c.y;
           var ox = x;
@@ -465,6 +465,12 @@ function DiagramSpace(cont) {
           o.disable = function () {
             o.undrag();
             o.hide();
+        }
+
+        o.joinTo = function(dst) {
+          s_drag_start();
+          dst.choose();
+          s_drag_stop();
         }
 
         o.drag(s_drag_move,s_drag_start,s_drag_stop);
@@ -545,6 +551,7 @@ function DiagramSpace(cont) {
           redraw_srcdst();
           children.forEach(function(c){c.drag_stop();});
           s.joint_show()
+          if ( s.moved_to_cb ) s.moved_to_cb(x,y);
       }
       s.drag_stop=drag_stop;
 

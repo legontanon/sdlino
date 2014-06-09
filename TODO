@@ -1,28 +1,32 @@
 
+
 - Data Model:
-   - write a description of data model for Editor and Compiler
-   - JSON based file format
+   - write a description of data model for Editor and Compiler (almost there)
+   - JSON based file format (lazy, XML one day)
 
 - Pastamatic
    - finish the C templates
    - refactor the runtime (and commit it)
-   - the generator itself
+   - write the code the generator itself
 
 - Infrastructure
   - POM testing and remotization
 
 - UI
   - Diagram:
+    - Break joints
+    - Clean deletes
     - FlowChart:
-       - break joints
-       - clean deletes
+       - Data management
     - System Diagram
 
   - Html Dialogs:
-    - reshape the if, with more flexibility/types.
+    - refactor with more flexibility/types.
   - HtmlTable Editor
-  - Documentation:
-       - find a CC or GPLable SDL tutorial and convert it
-       - write a reference
-       - help ?
-  - Application
+    - write
+  - Application, once the above are up the application is almost there...
+
+- Documentation:
+     - find a CC or GPLable SDL tutorial and convert it
+     - write a reference
+     - help ?
