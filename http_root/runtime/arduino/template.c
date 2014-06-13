@@ -47,10 +47,10 @@ struct _{{type_name}}_T {
 };
 
 ///ProcDecl:^
-//: ProcDeclVar+
+//: ProcVar+
 sdlino_wait_id_t P_{{proc_name}}( sdlino_wait_id_t, sdlino_signal_t*, sdlino_process_t*);
 typedef struct _{{proc_name}}_P {
-///ProcDecl:ProcDeclVar
+///ProcDecl:ProcVar
     {{var_type}}_T {{var_name}}{{var_cardinality}};
 ///ProcDecl:$
 } {{proc_name}}_P;
@@ -77,7 +77,8 @@ sdlino_wait_id_t sdlino_process_{{process_name}}(
     case SDLINO_WAIT_START:
       goto INITIAL:
 ///ProcDef:Wait:^
-//: Signal+ Returnmm'[5432§§§§]+
+//=SigRet {Signal Return}
+//: SigRet+
     case {{wait_id}}:
       switch(waiting_for) {
         case SDLINO_SIG_KILL:
@@ -102,11 +103,13 @@ sdlino_wait_id_t sdlino_process_{{process_name}}(
         goto error;
 
 ///ProcDef:IntoWait:^
+//: WaitInput+
         {{target_id}}:
           SDLINO_WAIT_INIT({{wait_id}});
 ///ProcDef:IntoWait:WaitInput
           SDLINO_WAIT_INPUT({{wait_id}},{{signal_id}});
           return proc->wait;
+///ProcDef:IntoWait:$
 
 ///ProcDef:State
           {{state_name}}: {{target_id}}:
@@ -174,7 +177,7 @@ SDLinoProcInst_t processes[{{process_num}}] = {
 
 ///MainCode:^
 //: SetupProc+
-setup() {
+void setup() {
   SDLinoInit();
 
 ///MainCode:SetupProc
@@ -183,7 +186,7 @@ setup() {
 ///MainCode:$
 }
 
-loop() {
+void loop() {
   SDLinoLoop();
 }
 

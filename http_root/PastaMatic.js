@@ -21,10 +21,11 @@
 
 
 function Template(text) {
-  me = this || {};
+  var me = this || {};
   me.text = text;
   me.parts = {};
-  me.tree = {type:""};
+  me.tree = {type:"/"};
+  me.parts["/"] = me.tree;
 
   function dump_tree_(p,off) {
     var str = off + p.type + ":\n"
@@ -74,7 +75,7 @@ function Template(text) {
     if (node.body) {
       body += replace_tags(node.body,cobj);
     } else {
-      for (var i in node.subparts) {
+      if ('subparts' in node) for (var i in node.subparts) {
         var subpart = node.subparts[i];
 
         if ((subpart in cobj)) {
@@ -86,12 +87,22 @@ function Template(text) {
 
             obj.forEach(function(iobj){
               var sp = alt ? iobj.what : subpart;
-              body += format_(iobj,node[sp]);
+
+              if ((sp in node))
+                body += format_(iobj,node[sp]);
+              else {
+                D([node,iobj]);
+                throw "E: No '"+sp+"' in '"+ node.type + "'";
+              }
+
             });
           } else {
             body += format_(obj,node[subpart]);
           }
         }
+      } else {
+        L("W(Template): Node '" + node.type +"' has no subparts and no body");
+        D([node,cobj]);
       }
     }
 
@@ -103,7 +114,7 @@ function Template(text) {
 
   me.format = function(tsys) { return format_(tsys,me.tree); }
 
-  me.get_or_create_node = function (path) {
+  function get_or_create_node(path) {
     var place = me.tree;
 
     for(var i=0; i < path.length; i++) {
@@ -122,22 +133,6 @@ function Template(text) {
         // L("Creating",c,place);
         place = place[c] = {type:c == undefined ? "" : c };
         continue;
-      }
-    }
-
-    return place;
-  }
-
-  me.get_node = function (path) {
-    var last_place = me.tree;
-    var c;
-
-    while( c = path.shift()) {
-      if (c in place) {
-        place = place[c];
-        continue;
-      } else {
-        return undef;
       }
     }
 
@@ -178,13 +173,14 @@ function Template(text) {
       return str.replace(chomp_re,function(m,p){return p;})
   }
 
-function ize(io) {
-  var oo = {};
-  for(var i in io) {
-    oo[io[i]] = true;
+  function ize(io) {
+    var oo = {};
+    for(var i in io) {
+      oo[io[i]] = true;
+    }
+    return oo;
   }
-  return oo;
-}
+
   function alts(texts) {
     var o = {};
 
@@ -200,32 +196,38 @@ function ize(io) {
   }
 
   sp.forEach(function(item){
-    var s = item.split(/\n/m);
+    var lines = item.split(/\n/m);
     var str = "";
-    var path_line=s.shift();
+    var path_line = lines.shift();
     var path = path_line.split(":");
-    var p = me.get_or_create_node(path);
+    var p = get_or_create_node(path);
     var subparts_line = undefined;
     var alt_lines = [];
     var items = {};
 
-    while (s[0].match(alt_re)) {
-      alt_lines.push(s.shift());
+    me.parts[path_line] = p;
+
+    while (lines[0].match(alt_re)) {
+      alt_lines.push(lines.shift());
     }
 
-    if (s[0].match(sub_re))
-      subparts_line = s.shift();
+    if (lines[0].match(sub_re))
+      subparts_line = lines.shift();
 
-    for (var i = 0; i<s.length; i++) {
-      str += s[i] + ((i==s.length-1)?'':"\n");
+    for (var i in lines) {
+      str += lines[i] + ((i==lines.length-1)?'':"\n");
     }
 
     str.replace(attr_re,function(m,name){ items[name]=name; });
 
     switch( path[path.length-1] ) {
     case '^':
-      p.card = {};
-      p.subparts = subparts_line ? subparts(subparts_line,p.card) : [];
+
+      if (subparts_line) {
+        p.card = {};
+        p.subparts = subparts(subparts_line,p.card)
+      }
+
       p.alt = alts(alt_lines);
       p.head = str;
       p.items = items;
@@ -272,65 +274,27 @@ function ize(io) {
 //   name = letters:[a-zA-Z][A-Za-z0-9]+ {}
 
 
-Template.prototype.get_item_subtypes = function() {
-  var s = [];
 
-
-
-  return s;
-}
-
-
-
-PastaMatic.prototype.compile = function () {
+PastaMatic.prototype.out = function () {
   this.system.timestamp = Date().toString();
-  var parts = this.template.parts;
 
-
-  var typedefs = '';
-  var typedecls = '';
-  L(this);
-  var types = this.system.types;
-
-  for (var i in types ) {
-    var type = types[i];
-    typedecls += replace_tags(parts.TypeDecl  || '', type);
-    typedefs += hif_replace("TypeDef",type,type.items,type);
-  }
-
-  var procdecls = '';
-  var procdefs = '';
-  var procs = this.system.procs;
-  for (var i in procs) {
-    var proc = procs[i];
-      procdecls += hif_replace("ProcDecl",proc,proc.vars,proc);
-
-      procdefs += replace_tags(parts.ProcDefHead  || '', proc);
-
-      for (var j in procd.vars) {
-        procdefs += replace_tags(parts.ProcDefVar  || '', proc.vars[j]);
-      }
-
-      procdefs += replace_tags(parts.ProcDefSwitch  || '', procd);
-
-      for (var i in procd.items) {
-        var item = procd.items[i];
-        procdefs += replace_tags(parts[item.type]  || '', item);
-      }
-
-      procdefs += replace_tags(parts.ProcDefFoot  || '', procd);
-  }
-
-
-  return replace_tags(parts.Header || '', this.system)
-        + typedecls + procdecls + typedefs + procdefs
-        + replace_tags(parts.Footer || '', this.system);
+  return this.template.format(this.conf);
 }
 
-function PastaMatic(system,template) {
-  this.template = template;
-  this.system = system;
-  // this.expr_parser = PEG.buildParser(expr_parser);
-  // this.cond_parser = PEG.buildParser(cond_parser);
+function PastaMatic(system,template_txt) {
+  var me = this || {};
+  var t = me.template = new Template(template_txt);
+  var s = me.system = clone(system);
+  var c = me.conf = {};
+  var confs = {
+    Enum:function(o,e){},
+    Type:function(o,e){},
+    Sig:function(o,e){},
+    Vars:function(o,e){},
+    Proc:function(o,e){},
+    Module:function(o,e){},
+    Lib:function(o,e){},
+  };
 
+  return me;
 }

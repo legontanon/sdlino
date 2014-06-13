@@ -86,19 +86,109 @@ var test_system = {
         {what:"VarDecl", var_name:"b",var_type:'Str', var_default:"hello!"},
         {what:"VarDecl", var_name:"c",var_type:'Int',var_cardinality:'[10]', var_default:"[0,0,0,0,0,0,0,0,0,0]"},
       ], ProcDefItem: [
-        {target_id:"DoorCtl00", what:"State",state_name:"INITIAL",pos:{x:500,y:200},dst_target_id:'DoorCtl01'},
+        {what:"State",state_name:"INITIAL",pos:{x:500,y:200},state_id:0,dst_target_id:'DoorCtl01'},
         {target_id:"DoorCtl01", what:"Condition",condition:"a == 0",pos:{x:500,y:300},true_target_id:'DoorCtl02',false_target_id:'DoorCtl03'},
-        {target_id:"DoorCtl02", what:"GoToState",state_name:"INITIAL",pos:{x:300,y:400}},
         {target_id:"DoorCtl03", what:"Output",signal_id:"TimerStart",pos:{x:700,y:400},dst_target_id:'DoorCtl04',OutParam:[
-          {signal_id:1,param_name:"timer_id",param_val:1},
-          {signal_id:1,param_name:"delay",param_val:1000},
-          {signal_id:1,param_name:"var",param_val:10},
+          {signal_id:1,param_name:"timer_id",param_val:"1"},
+          {signal_id:1,param_name:"delay",param_val:"1000"},
+          {signal_id:1,param_name:"var",param_val:"10"},
         ]},
-        {target_id:"DoorCtl04", what:"VarSet",var_name:"a",expr:"1",pos:{x:300,y:400},dst_target_id:'DoorCtl06'},
+        {target_id:"DoorCtl04", what:"VarSet",var_name:"a",expr:"1",pos:{x:300,y:400},dst_target_id:'DoorCtl05'},
+        {target_id:"DoorCtl05", what:"IntoWait",wait_id:"wDoorCtl01",pos:{x:300,y:400}},
+        {wait_id:"wDoorCtl01",what:"Wait",SigRet:[
+          {what:"Signal",pos:{x:300,y:400},signal_id:"PinUp",dst_target_id:"DoorCtl07"},
+          {what:"Return",pos:{x:300,y:400},proc_id:"Procd01",dst_target_id:"DoorCtl08"},
+          //{what:"Return",pos:{x:300,y:400}},signal_id:"",dst_target_id:""},
+        ]},
+        {target_id:"DoorCtl07",what:"GoToState",state_name:"STATE2"},
+        {target_id:"DoorCtl07",what:"State",state_name:"STATE2",state_id:1,pos:{x:500,y:200},dst_target_id:'DoorCtl01'},
       ],
     },
   ],
 };
+
+
+
+Elem.prototype.add_joint = function(joint_name, elem2) {
+  var js = this.joints[joint_name] = this.joints[joint_name] || []
+  var js2 = elem2.joints[joint_name] = elem2.joints[joint_name] || []
+  me.add("dst_target_id",e.target_id);
+  js.push(elem2);
+  js2.push(this);
+}
+
+Elem.prototype.remove_joint = function(joint_name,elem2) {
+  var js = this.joints[joint_name];
+  var js2 = elem2.joints[joint_name];
+
+  js2.exclude(this);
+  js.exclude(elem2);
+}
+
+Elem.prototype.clean = function() {
+  var o = {};
+  this.Memers.forEach(function(e){ o[e] = this[e]; });
+  return o;
+}
+
+function Elem(fc,pos) {
+  this.pos = pos;
+  this.joints = {};
+  this.fc = fc;
+
+  return this;
+}
+
+Elem.prototype.add(name,val) {
+  this.Members.push(name);
+  this[name]=val;
+}
+
+Elem.prototype.add_target() {
+  this.Members.push("target_id");
+  this.target_id = this.fc.get_next_target_id();
+}
+
+function State(fc, name,pos) {
+    me = new Elem(fc, pos);
+    me.add("state_name",name);
+    me.add_target();
+    me.Members = ["state_name","target_id","dst_target_id"];
+    return me;
+}
+
+
+function ProcDef(name) {
+  var me = this || {};
+  me.vars = []
+  me.elems = []
+  me.next_target_id = 0;
+
+
+
+  me.add_var = function(name,type,dflt) { me.vars.push({
+      var_name:name, var_type:type, var_default:dflt
+    });}
+
+  me.add_elem = function(elem) { me.elems.push(elem.clone());}
+
+
+  me.conf = function() {
+    var o = {};
+    var vs = clone(me.vars);
+    var es = clone(me.elems);
+
+    for( var i in vs ) {
+      var v = vs[i];
+      v.what = "VarDecl";
+
+    }
+
+    o.ProcVar = o.ProcDeclVar = vs;
+
+    o.ProcDefItem = es ;
+  }
+}
 
 function reitemize_procs(ps) {
   ps = clone(ps);
@@ -165,10 +255,14 @@ function TestHtmlMenu() {
   }
 }
 
+FlowChart.prototype
 
 function FlowChart(cont,elements) {
   this.diagram = new DiagramSpace(cont);
   this.elements = elements;
+  var next_target_id=0;
+
+  this.get_next_target_id = function() { return next_target_id++; }
 
   function edit_text_cbg(e) { return function() {
     new HtmlTxtBox("Dlg","Edit",function(t){ e.set_text(t); e._txt = t }, e._txt);
