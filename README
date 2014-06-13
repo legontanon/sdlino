@@ -3,12 +3,13 @@ SDLino
 SDLino is a partial implementation (editor/compiler) of ITU-T Z.100/SDL
 targeting the Arduino platform.
 
-For those unfamiliar with SDL; It is a graphical programming language, basically
-a mix of Flow Charts and State Transition diagrams, and module interaction
-diagrams.  http://en.wikipedia.org/wiki/Specification_and_Description_Language
+For those unfamiliar with SDL; It is a graphical programming language,
+basically a mix of Flow Charts and State Transition diagrams, and module
+interaction diagrams.
+see http://en.wikipedia.org/wiki/Specification_and_Description_Language
 
-For those unfamiliar with Arduino; It is a simplified micro-controler development
-platform based on C. http://arduino.cc/
+For those unfamiliar with Arduino; It is a simplified micro-controler
+development platform based on C. see http://arduino.cc/
 
 The project is being written in JS and C, the parts that are there are being
 run only on Firefox so far. Finally there should be a node.js server to
@@ -21,8 +22,8 @@ Current Status: I'sd say 30% up to pre-alpha release...
 Some of the frontend (browser) code is there already:
 
 DiagramState.js manages flowcharting, is buggy but almost there.
-HtmlDlg.js creates pop-up dialogs using <form>s... more cosmetic changes are needed...
-POM.js manages localStorage of complex objects... to be tested/used/maybe refactored
+HtmlDlg.js creates pop-up dialogs using <form>s. cosmetic changes are needed.
+POM.js manages localStorage of complex objects. to be tested/used
 
 The backend SDL data model and the "spaghetti code compiler" (a.k.a PastaMatic)
 is already in my head and very stable since I've got this thing bugging my
